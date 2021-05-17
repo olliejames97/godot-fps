@@ -6,7 +6,7 @@ export(int) var gravity = -30
 export(int) var speed = 12
 export(float) var mouse_sensitivity = 0.0006  # radians/pixel
 
-export(int) var jump_speed = 8
+export(int) var jump_speed = 20
 
 var velocity = Vector3()
 var jump = false
@@ -56,14 +56,19 @@ func _unhandled_input(event):
 		
 		
 func _physics_process(delta):
-	velocity.y += gravity * delta
+
 	var desired_dir = get_input()
 	
-	# velocity = ground_velocity(desired_dir, velocity)
-	velocity = ground_velocity_2(desired_dir, speed, velocity, ground_acceleration)
+	
+	velocity.y += gravity * delta
+	var desired_velocity = get_input() * speed
+
+	velocity.x = desired_velocity.x
+	velocity.z = desired_velocity.z
 	velocity = move_and_slide(velocity, Vector3.UP, true)
 	
-	
+
+	# for debug only
 	calculated_speed = sqrt(velocity.x * velocity.x + velocity.z * velocity.z) 
 	$Label.set_text("%.1f" % calculated_speed)
 
@@ -72,33 +77,4 @@ func _physics_process(delta):
 			velocity.y = jump_speed
 
 
-func ground_velocity_2(wishdir, wishspeed, vel, accel):
-	# vel = friction(vel, wishdir, 0.5)
-	vel = acceleration(wishdir, wishspeed, vel, accel)
-	return vel
-	
-	
-var current_speed = 0
-func friction(vel, wishdir, amount):
-	if wishdir.x == 0:
-		vel.x = lerp(vel.x, 0, amount)
-	if wishdir.z == 0:
-		vel.z = lerp(vel.z, 0, amount)
-	
-	return vel
-	
-func acceleration(wishdir, wishspeed, vel, amount):
-	current_speed = vel.dot(wishdir)
-	var add_speed = wishspeed - current_speed
-	var accel_speed = amount * wishspeed
-	if accel_speed > add_speed:
-		accel_speed = add_speed
-
-	
-	vel.x += accel_speed * wishdir.x
-	vel.z += accel_speed * wishdir.z
-	
-	return vel
-	
-	
 
