@@ -1,6 +1,7 @@
 extends KinematicBody
 
 onready var camera = $Pivot/Camera
+onready var gun =  $Pivot/Camera/gun
 
 export(int) var gravity = -30
 export(int) var speed = 12
@@ -18,22 +19,26 @@ func _ready():
 
 var calculated_speed = 0
 
+func get_general_input():
+	if Input.is_action_just_pressed("fire"):
+		gun.fire()
 
-func get_input():
-	jump = false
-	# tabbing out and in
+
+func get_meta_input():
 	if Input.is_action_just_pressed("esc"):
 		Input.set_mouse_mode(0)
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		if Input.is_action_just_pressed("fire"):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			
+
+func get_basic_movement_input():
+	jump = false
+
 	if Input.is_action_pressed("jump"):
 		jump = true
-	
-	# reset
 
-	# actual movement stuff
+	# actual movement stuff		
 	var input_dir = Vector3()
 	# desired move in camera direction
 	if Input.is_action_pressed("move_forward"):
@@ -57,11 +62,12 @@ func _unhandled_input(event):
 		
 func _physics_process(delta):
 
-	var desired_dir = get_input()
 	
+	get_meta_input()
+	get_general_input()
 	
 	velocity.y += gravity * delta
-	var desired_velocity = get_input() * speed
+	var desired_velocity = get_basic_movement_input() * speed
 
 	velocity.x = desired_velocity.x
 	velocity.z = desired_velocity.z
